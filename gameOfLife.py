@@ -6,21 +6,23 @@ class GameOfLife(object):
     def __init__(self):
         self.width = 1000
         self.height = 1000
-        self.board = self.initialise()
-        self.cellsize = self.width / 100
         self.cells = 100
-        self.alivecells = self.getAliveCells()
+        self.board = [[False for _ in range(self.cells)] for _ in range(self.cells)]
+        self.cellsize = self.width / 100
+        self.alivecells = []
         self.clock = pygame.time.Clock()
+        self.surface = pygame.display.set_mode((self.width, self.height))
 
-    def initialise(self, alive=[]):
-        board = [[False for _ in range(self.cells)] for _ in range(self.cells)]
+    def addRandomCells(self, alive=[]):
         if alive:
             for col, row in alive:
                 try:
                     self.board[row][col] = True
                 except:
                     pass
-        return board
+
+    def randomcells(self):
+        return [(randint(1, 99), randint(1, 99)) for _ in range(randint(1, 15))]
 
     def getNeighbours(self, cell):
         x, y = cell
@@ -38,7 +40,7 @@ class GameOfLife(object):
         return count
 
     def evolve(self):
-        new = self.initialise()
+        new = [[False for _ in range(self.cells)] for _ in range(self.cells)]
 
         for row, val in enumerate(self.board):
             for col, val2 in enumerate(val):
@@ -58,7 +60,18 @@ class GameOfLife(object):
         return alive
 
     def draw(self):
-        pass
+        h = 0
+        for row in range(self.cells):
+            for col in range(self.cells):
+                centerX = (col * self.cellsize) + self.cellsize / 2
+                centerY = (row * self.cellsize) + self.cellsize / 2
+                if self.board[row][col]:
+                    pygame.draw.rect(self.surface, (h, 128, 128), (centerX, centerY, self.cellsize, self.cellsize))
+                    h = (h + 10) % 255
+                else:
+                    pygame.draw.rect(self.surface, (0, 0, 0), (centerX, centerY, self.cellsize, self.cellsize))
+
+        pygame.display.update()
 
     def run(self):
         run = True
@@ -66,14 +79,25 @@ class GameOfLife(object):
         pygame.display.set_caption("Conway's Game of Life")
 
         while run:
-            self.draw()
-            self.clock.tick()
+            self.clock.tick(40)
+            self.addRandomCells([(0, 0), (1, 0), (0, 1), (1, 1), (2, 1), (4, 4)])
+            self.alivecells = self.getAliveCells()
+            print(self.alivecells)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     run = False
                     pygame.display.quit()
-                elif event.type == pygame.K_SPACE:
-                    self.board = self.initialise()
+                if event.type == pygame.KEYDOWN:
+                    key = pygame.key.get_pressed()
+                    if key[pygame.K_SPACE]:
+                        self.addRandomCells(self.randomcells())
+                    elif key[pygame.K_ESCAPE]:
+                        run = False
+                        pygame.display.quit()
+            self.draw()
+            self.evolve()
+            self.alivecells = self.getAliveCells()
+            pygame.display.update()
         pygame.quit()
 
 
