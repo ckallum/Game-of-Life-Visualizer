@@ -3,7 +3,7 @@
 
 Callum Ke
 
-This is a PyGame that visualization of Conway's Game of Life which is a basic cellular automata.
+This is a visualization of Conway's Game of Life which is a basic cellular automata implemented in PyGame.
 
 How to Run
 ------------
